@@ -2,8 +2,6 @@
 --Bubbles by SifuF--
 --------------------
 
-local main = nil
-
 level = 1
 bubble = {}
 numberOfBubbles = 20
@@ -17,10 +15,10 @@ local leftRectangle = display.newRect(0 - thickness, display.contentCenterY, thi
 local rightRectangle = display.newRect(display.contentWidth + thickness, display.contentCenterY, thickness, display.contentHeight)
 
 local rectColour = 0.0
-bottomRectangle:setFillColor( rectColour )
-topRectangle:setFillColor( rectColour )
-leftRectangle:setFillColor( rectColour )
-rightRectangle:setFillColor( rectColour )
+bottomRectangle:setFillColor(rectColour)
+topRectangle:setFillColor(rectColour)
+leftRectangle:setFillColor(rectColour)
+rightRectangle:setFillColor(rectColour)
 
 local backgrounds = {
     "gfx/background1.jpg",
@@ -36,35 +34,29 @@ local backgrounds = {
 }
 
 local musics = {
-    { file = audio.loadStream("wav/music1.mp3"), start = 500000 },
-    { file = audio.loadStream("wav/music1.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music3.mp3"), start = 5000 },
-    { file = audio.loadStream("wav/music4.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music5.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music6.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music7.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music8.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music9.mp3"), start = 0 },
-    { file = audio.loadStream("wav/music10.mp3"), start = 0 }
+    audio.loadStream("wav/music1.mp3"),
+    audio.loadStream("wav/music1.mp3"),
+    audio.loadStream("wav/music3.mp3"),
+    audio.loadStream("wav/music4.mp3"),
+    audio.loadStream("wav/music5.mp3"),
+    audio.loadStream("wav/music6.mp3"),
+    audio.loadStream("wav/music7.mp3"),
+    audio.loadStream("wav/music8.mp3"),
+    audio.loadStream("wav/music9.mp3"),
+    audio.loadStream("wav/music10.mp3")
 }
 
-local popSound1 = audio.loadSound("wav/pop1.wav")
-local popSound2 = audio.loadSound("wav/pop2.wav")
-local popSound3 = audio.loadSound("wav/pop3.wav")
+local popSounds = {
+    audio.loadSound("wav/pop1.wav"),
+    audio.loadSound("wav/pop2.wav"),
+    audio.loadSound("wav/pop3.wav"),
+}
 
 local function myTouchListener( event )
-    if ( event.phase == "began" ) then
+    if event.phase == "began" then
         event.target:removeSelf()
         activeBubbles = activeBubbles-1
-
-        local burstType = math.random(3)
-        if(burstType == 1) then
-            audio.play( popSound1 )
-        elseif(burstType == 2) then
-            audio.play( popSound2 )
-        else
-            audio.play( popSound3 )
-        end
+        audio.play(popSounds[math.random(#popSounds)])
     end
 end
 
@@ -72,16 +64,16 @@ local function createBubbles()
     local shift = 0		   
     for i=1, numberOfBubbles do
         bubble[i] = display.newImage("gfx/bubble.png")
-        bubble[i]:addEventListener( "touch", myTouchListener )
+        bubble[i]:addEventListener("touch", myTouchListener)
         bubble[i].x = bubble[i].x + shift
-        physics.addBody(bubble[i], "dynamic", { density = 0.1, friction = 0.3, bounce = 0.8, radius = 60 })
+        physics.addBody(bubble[i], "dynamic", {density = 0.1, friction = 0.3, bounce = 0.8, radius = 60})
         shift = shift + 50
     end
 end
 
 local function reset()
     audio.stop(1)
-    audio.play( musics[level].file, { channel=1, loops=-1, startTime=10000}  )
+    audio.play(musics[level], { channel=1, loops=-1 })
 
     local backGround = display.newImage(backgrounds[level])
     backGround.x = display.contentCenterX
@@ -93,12 +85,12 @@ local function reset()
     level = (level % #backgrounds) + 1
 end
 
-local function tiltFunc( event )
-    physics.setGravity( 10 * event.yGravity, 10 * event.xGravity )
-    if (activeBubbles < 1) then
-        local shakeSquared = 4.0 
+local function tiltFunc(event)
+    physics.setGravity(10 * event.yGravity, 10 * event.xGravity)
+    if activeBubbles < 1 then
+        local shakeSquared = 3.5 
         local accel = event.xInstant^2 + event.yInstant^2 + event.zInstant^2
-        if(accel > shakeSquared) then
+        if accel > shakeSquared then
             reset()
         end	
     end 
