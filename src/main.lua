@@ -4,18 +4,13 @@
 
 local main = nil
 
---Globals--
-bubble = {}    -- new array
+level = 1
+bubble = {}
 numberOfBubbles = 20
 activeBubbles = numberOfBubbles
 local physics = require("physics")
 
-local backGround = display.newImage("gfx/background.jpg")
-backGround.x = display.contentCenterX
-backGround.y = display.contentCenterY
-
 local thickness = 10
---display.newRect( [parent,] x, y, width, height )
 local bottomRectangle = display.newRect(display.contentCenterX, display.contentHeight + thickness, display.contentWidth, thickness)
 local topRectangle = display.newRect(display.contentCenterX, -thickness, display.contentWidth, thickness)
 local leftRectangle = display.newRect(0 - thickness, display.contentCenterY, thickness, display.contentHeight)
@@ -27,74 +22,97 @@ topRectangle:setFillColor( rectColour )
 leftRectangle:setFillColor( rectColour )
 rightRectangle:setFillColor( rectColour )
 
-local backgroundMusic = audio.loadStream("wav/backgroundMusic.mp3")
+local backgrounds = {
+    "gfx/background1.jpg",
+    "gfx/background2.jpg",
+    "gfx/background3.jpg",
+    "gfx/background4.jpg",
+    "gfx/background5.jpg",
+    "gfx/background6.jpg",
+    "gfx/background7.jpg",
+    "gfx/background8.jpg",
+    "gfx/background9.jpg",
+    "gfx/background10.jpg"
+}
+
+local musics = {
+    { file = audio.loadStream("wav/music1.mp3"), start = 500000 },
+    { file = audio.loadStream("wav/music1.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music3.mp3"), start = 5000 },
+    { file = audio.loadStream("wav/music4.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music5.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music6.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music7.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music8.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music9.mp3"), start = 0 },
+    { file = audio.loadStream("wav/music10.mp3"), start = 0 }
+}
+
 local popSound1 = audio.loadSound("wav/pop1.wav")
 local popSound2 = audio.loadSound("wav/pop2.wav")
 local popSound3 = audio.loadSound("wav/pop3.wav")
 
-
---Event handlers--
-local function urTiltFunc( event )
-    physics.setGravity( 10 * event.yGravity, 10 * event.xGravity )
- 
-    if (activeBubbles < 1) then
-	    if(event.xGravity > 0.1) then
-		    activeBubbles = numberOfBubbles
-		    --print("x = "..event.xGravity)
-	        --print("y = "..event.yGravity)
-	        main()
-	    end	
-	end 
-end 
-
 local function myTouchListener( event )
     if ( event.phase == "began" ) then
-        --print( "Touch X location"..event.x )
-        --print( event.target )
-		event.target:removeSelf()
-		activeBubbles = activeBubbles-1
-		
-		local burstType = math.random(3)
-		
-		if(burstType == 1) then
-		    audio.play( popSound1 )
-		    --print(burstType)
-		elseif(burstType == 2) then
-		    audio.play( popSound2 )
-		    --print(burstType)
-		else
-		    audio.play( popSound3 )
-			--print(burstType)
-		end
+        event.target:removeSelf()
+        activeBubbles = activeBubbles-1
+
+        local burstType = math.random(3)
+        if(burstType == 1) then
+            audio.play( popSound1 )
+        elseif(burstType == 2) then
+            audio.play( popSound2 )
+        else
+            audio.play( popSound3 )
+        end
     end
 end
-
 
 local function createBubbles() 
-   
     local shift = 0		   
-	for i=1, numberOfBubbles do
+    for i=1, numberOfBubbles do
         bubble[i] = display.newImage("gfx/bubble.png")
-		bubble[i]:addEventListener( "touch", myTouchListener )
-		bubble[i].x = bubble[i].x + shift
-	    physics.addBody(bubble[i], "dynamic", { density = 0.1, friction = 0.3, bounce = 0.8, radius = 60 })
-		shift = shift + 50
+        bubble[i]:addEventListener( "touch", myTouchListener )
+        bubble[i].x = bubble[i].x + shift
+        physics.addBody(bubble[i], "dynamic", { density = 0.1, friction = 0.3, bounce = 0.8, radius = 60 })
+        shift = shift + 50
     end
 end
 
-main = function()
-   createBubbles()
+local function reset()
+    audio.stop(1)
+    audio.play( musics[level].file, { channel=1, loops=-1, startTime=10000}  )
+
+    local backGround = display.newImage(backgrounds[level])
+    backGround.x = display.contentCenterX
+    backGround.y = display.contentCenterY
+
+    activeBubbles = numberOfBubbles
+    createBubbles()
+
+    level = (level % #backgrounds) + 1
 end
 
---First tasks and physics engine--
-physics.start()
-physics.addBody(bottomRectangle, "static")
-physics.addBody(topRectangle, "static")
-physics.addBody(leftRectangle, "static")
-physics.addBody(rightRectangle, "static")
-Runtime:addEventListener( "accelerometer", urTiltFunc )
+local function tiltFunc( event )
+    physics.setGravity( 10 * event.yGravity, 10 * event.xGravity )
+    if (activeBubbles < 1) then
+        local shakeSquared = 4.0 
+        local accel = event.xInstant^2 + event.yInstant^2 + event.zInstant^2
+        if(accel > shakeSquared) then
+            reset()
+        end	
+    end 
+end 
 
-local backgroundMusicChannel = audio.play( backgroundMusic, { channel=1, loops=-1, fadein=5000 }  )  -- play the background music on channel 1, loop infinitely, and fadein over 5 seconds 
---local popChannel = audio.play( popSound )  -- play the laser on any available channel
+local function start()
+    physics.start()
+    physics.addBody(bottomRectangle, "static")
+    physics.addBody(topRectangle, "static")
+    physics.addBody(leftRectangle, "static")
+    physics.addBody(rightRectangle, "static")
+    Runtime:addEventListener( "accelerometer", tiltFunc)
 
-main()
+    reset()
+end
+
+start()
