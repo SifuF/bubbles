@@ -3,17 +3,15 @@
 --------------------
 
 local level = 1
-local levelBubbleCounts = {1, 1, 20, 20, 1, 15, 9, 1, 12, 9}
+local levelBubbleCounts = {1, 20, 9, 20, 1, 15, 9, 1, 12, 10}
 local bubbles = {}
 local bubbleTextures = {}
 local backgroundTextures = {}
 local musics = {}
 local popSounds = {}
-
 local numberOfBubbles = 20
 local activeBubbles = numberOfBubbles
-
-local physics = require("physics")
+local physics
 
 local function touchListener( event )
     if event.phase == "began" then
@@ -74,6 +72,7 @@ local function start()
         table.insert(popSounds, audio.loadSound("wav/pop" .. i .. ".wav"))
     end
     
+    physics = require("physics")
     physics.start()
 
     local wallThickness = 10
