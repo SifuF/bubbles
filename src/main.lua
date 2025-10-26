@@ -33,6 +33,19 @@ local backgrounds = {
     "gfx/background10.jpg"
 }
 
+local bubbles = {
+    {"gfx/bubble.png"},
+    {"gfx/bubble2.png"},
+    {"gfx/bubble3_1.png", "gfx/bubble3_2.png", "gfx/bubble3_3.png", "gfx/bubble3_4.png", "gfx/bubble3_5.png", "gfx/bubble3_6.png", "gfx/bubble3_7.png", "gfx/bubble3_8.png", "gfx/bubble3_9.png", "gfx/bubble3_10.png", "gfx/bubble3_11.png", "gfx/bubble3_12.png", "gfx/bubble3_13.png", "gfx/bubble3_14.png", "gfx/bubble3_15.png", "gfx/bubble3_16.png", "gfx/bubble3_17.png", "gfx/bubble3_18.png", "gfx/bubble3_19.png", "gfx/bubble3_20.png"},
+    {"gfx/bubble4_1.png", "gfx/bubble4_2.png", "gfx/bubble4_3.png", "gfx/bubble4_4.png", "gfx/bubble4_5.png", "gfx/bubble4_6.png", "gfx/bubble4_7.png", "gfx/bubble4_8.png", "gfx/bubble4_9.png", "gfx/bubble4_10.png", "gfx/bubble4_11.png", "gfx/bubble4_12.png", "gfx/bubble4_13.png", "gfx/bubble4_14.png", "gfx/bubble4_15.png", "gfx/bubble4_16.png", "gfx/bubble4_17.png", "gfx/bubble4_18.png", "gfx/bubble4_19.png", "gfx/bubble4_20.png"},
+    {"gfx/bubble5_1.png"}, --"gfx/bubble5_2.png", "gfx/bubble5_3.png", "gfx/bubble5_4.png", "gfx/bubble5_5.png", "gfx/bubble5_6.png",},
+    {"gfx/bubble6_1.png", "gfx/bubble6_2.png", "gfx/bubble6_3.png", "gfx/bubble6_4.png", "gfx/bubble6_5.png", "gfx/bubble6_6.png", "gfx/bubble6_7.png", "gfx/bubble6_8.png", "gfx/bubble6_9.png", "gfx/bubble6_10.png", "gfx/bubble6_11.png", "gfx/bubble6_12.png", "gfx/bubble6_13.png", "gfx/bubble6_14.png", "gfx/bubble6_15.png"},
+    {"gfx/bubble7_1.png", "gfx/bubble7_2.png", "gfx/bubble7_3.png", "gfx/bubble7_4.png", "gfx/bubble7_5.png", "gfx/bubble7_6.png", "gfx/bubble7_7.png", "gfx/bubble7_8.png", "gfx/bubble7_9.png"},
+    {"gfx/bubble8.png"},
+    {"gfx/bubble9_1.png", "gfx/bubble9_2.png", "gfx/bubble9_3.png", "gfx/bubble9_4.png", "gfx/bubble9_5.png", "gfx/bubble9_6.png", "gfx/bubble9_7.png", "gfx/bubble9_8.png", "gfx/bubble9_9.png", "gfx/bubble9_10.png", "gfx/bubble9_11.png", "gfx/bubble9_12.png"},
+    {"gfx/bubble10_1.png", "gfx/bubble10_2.png", "gfx/bubble10_3.png", "gfx/bubble10_4.png", "gfx/bubble10_5.png", "gfx/bubble10_6.png", "gfx/bubble10_7.png", "gfx/bubble10_8.png", "gfx/bubble10_9.png"},
+}
+
 local musics = {
     audio.loadStream("wav/music1.mp3"),
     audio.loadStream("wav/music1.mp3"),
@@ -52,7 +65,7 @@ local popSounds = {
     audio.loadSound("wav/pop3.wav"),
 }
 
-local function myTouchListener( event )
+local function touchListener( event )
     if event.phase == "began" then
         event.target:removeSelf()
         activeBubbles = activeBubbles-1
@@ -63,8 +76,8 @@ end
 local function createBubbles() 
     local shift = 0		   
     for i=1, numberOfBubbles do
-        bubble[i] = display.newImage("gfx/bubble.png")
-        bubble[i]:addEventListener("touch", myTouchListener)
+        bubble[i] = display.newImage(bubbles[level][((i - 1) % #bubbles[level]) + 1])
+        bubble[i]:addEventListener("touch", touchListener)
         bubble[i].x = bubble[i].x + shift
         physics.addBody(bubble[i], "dynamic", {density = 0.1, friction = 0.3, bounce = 0.8, radius = 60})
         shift = shift + 50
@@ -85,7 +98,7 @@ local function reset()
     level = (level % #backgrounds) + 1
 end
 
-local function tiltFunc(event)
+local function accelerometerListener(event)
     physics.setGravity(10 * event.yGravity, 10 * event.xGravity)
     if activeBubbles < 1 then
         local shakeSquared = 3.5 
@@ -102,7 +115,7 @@ local function start()
     physics.addBody(topRectangle, "static")
     physics.addBody(leftRectangle, "static")
     physics.addBody(rightRectangle, "static")
-    Runtime:addEventListener( "accelerometer", tiltFunc)
+    Runtime:addEventListener( "accelerometer", accelerometerListener)
 
     reset()
 end
