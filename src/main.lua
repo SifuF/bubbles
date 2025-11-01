@@ -49,7 +49,7 @@ end
 local function accelerometerListener(event)
     physics.setGravity(10 * event.yGravity, 10 * event.xGravity)
     if activeBubbles < 1 then
-        local shakeSquared = 3.5 
+        local shakeSquared = 2.5
         local accel = event.xInstant^2 + event.yInstant^2 + event.zInstant^2
         if accel > shakeSquared then
             reset()
